@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuhelamina SU, Lda</title>
+
+<style>
+body { margin:0; font-family: Arial; background:#eef2f7; }
+
+header {
+    background: linear-gradient(90deg,#0a3d62,#3c6382);
+    color:white;
+    padding:30px;
+    text-align:center;
+}
+
+header img {
+    width:200px;
+    display:block;
+    margin:auto;
+}
+
+nav {
+    background:#1e3799;
+    text-align:center;
+}
+
+nav button {
+    background:none;
+    color:white;
+    border:none;
+    padding:15px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+nav button:hover {
+    background:#4a69bd;
+}
+
+.container { display:none; padding:20px; }
+.active { display:block; }
+
+.card {
+    background:white;
+    max-width:500px;
+    margin:auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 5px 10px rgba(0,0,0,0.1);
+}
+
+input, select {
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+}
+
+button.action {
+    width:100%;
+    background:#0a3d62;
+    color:white;
+    padding:10px;
+    border:none;
+}
+
+li {
+    list-style:none;
+    background:#ddd;
+    margin:5px;
+    padding:10px;
+}
+
+footer {
+    background:#0a3d62;
+    color:white;
+    text-align:center;
+    padding:10px;
+}
+
+/* WhatsApp */
+.whatsapp {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #25D366;
+    color: white;
+    padding: 18px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<img src="logo.png">
+<h1>Cuhelamina SU, Lda</h1>
+<p>Solicite serviços sem sair de casa</p>
+</header>
+
+<nav>
+<button onclick="mostrar('home')">Início</button>
+<button onclick="mostrar('sobre')">Sobre</button>
+<button onclick="mostrar('login')">Login</button>
+<button onclick="mostrar('register')">Cadastro</button>
+<button onclick="mostrar('admin')">Admin</button>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="container active">
+<div class="card">
+<img src="logo.png" style="width:100%; border-radius:10px;">
+<h2>Bem-vindo</h2>
+<p>Agora você pode solicitar serviços diretamente pela nossa plataforma digital.</p>
+</div>
+</div>
+
+<!-- SOBRE -->
+<div id="sobre" class="container">
+<div class="card">
+<h2>Sobre</h2>
+<p>Empresa localizada em Quiculungo, dedicada à prestação de serviços com qualidade e profissionalismo.</p>
+</div>
+</div>
+
+<!-- CADASTRO -->
+<div id="register" class="container">
+<div class="card">
+<h2>Cadastro</h2>
+<input id="rUser" placeholder="Nome">
+<input id="rPass" type="password" placeholder="Senha">
+<button class="action" onclick="cadastrar()">Cadastrar</button>
+</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="container">
+<div class="card">
+<h2>Login</h2>
+<input id="lUser" placeholder="Nome">
+<input id="lPass" type="password" placeholder="Senha">
+<button class="action" onclick="entrar()">Entrar</button>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="container">
+<div class="card">
+<h2 id="welcome"></h2>
+
+<h3>Solicitar Serviço</h3>
+<select id="service">
+<option>Assistência Técnica</option>
+<option>Consultoria</option>
+<option>Serviços Gerais</option>
+</select>
+
+<button class="action" onclick="solicitar()">Solicitar</button>
+
+<h3>Histórico</h3>
+<ul id="lista"></ul>
+
+<button class="action" onclick="sair()">Sair</button>
+</div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="container">
+<div class="card">
+<h2>Painel Admin</h2>
+<ul id="adminList"></ul>
+<button class="action" onclick="verPedidos()">Atualizar</button>
+</div>
+</div>
+
+<!-- BOTÃO WHATSAPP -->
+<div class="whatsapp" onclick="whatsapp()">💬</div>
+
+<footer>
+<p>© 2026 Cuhelamina SU, Lda</p>
+</footer>
+
+<script>
+
+function mostrar(id){
+let telas=document.getElementsByClassName("container");
+for(let i=0;i<telas.length;i++){
+telas[i].classList.remove("active");
+}
+document.getElementById(id).classList.add("active");
+}
+
+function cadastrar(){
+let u=rUser.value;
+let p=rPass.value;
+
+if(u==""||p==""){
+alert("Preencha!");
+return;
+}
+
+localStorage.setItem(u,p);
+alert("Conta criada!");
+mostrar("login");
+}
+
+function entrar(){
+let u=lUser.value;
+let p=lPass.value;
+
+if(localStorage.getItem(u)==p){
+localStorage.setItem("user",u);
+welcome.innerText="Bem-vindo "+u;
+carregar();
+mostrar("dashboard");
+}else{
+alert("Erro!");
+}
+}
+
+function sair(){
+localStorage.removeItem("user");
+mostrar("home");
+}
+
+function solicitar(){
+let serv=service.value;
+let user=localStorage.getItem("user");
+
+let dados=JSON.parse(localStorage.getItem("pedidos"))||[];
+
+dados.push(user+" - "+serv+" - "+new Date().toLocaleString());
+
+localStorage.setItem("pedidos",JSON.stringify(dados));
+
+carregar();
+}
+
+function carregar(){
+let user=localStorage.getItem("user");
+let lista=document.getElementById("lista");
+lista.innerHTML="";
+
+let dados=JSON.parse(localStorage.getItem("pedidos"))||[];
+
+dados.forEach(d=>{
+if(d.includes(user)){
+let li=document.createElement("li");
+li.innerText=d;
+lista.appendChild(li);
+}
+});
+}
+
+function verPedidos(){
+let lista=document.getElementById("adminList");
+lista.innerHTML="";
+
+let dados=JSON.parse(localStorage.getItem("pedidos"))||[];
+
+dados.forEach(d=>{
+let li=document.createElement("li");
+li.innerText=d;
+lista.appendChild(li);
+});
+}
+
+function whatsapp(){
+let numero = "244934591705";
+let mensagem = "Olá, gostaria de solicitar um serviço.";
+let url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensagem);
+window.open(url);
+}
+
+</script>
+
+</body>
+</html>
